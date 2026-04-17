@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileText, File, Trash2, Download, Search, Filter, CheckCircle, AlertCircle, Image } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import API_BASE from '../config/api';
 import './Documents.css';
 
 interface Doc {
@@ -35,7 +36,7 @@ export default function Documents() {
 
   const fetchDocs = async () => {
     try {
-      const res = await fetch('http://localhost:5001/api/documents', {
+      const res = await fetch(`${API_BASE}/api/documents`, {
         headers: { 'Authorization': `Bearer ${user?.token}` }
       });
       if (res.ok) {
@@ -58,7 +59,7 @@ export default function Documents() {
       formData.append('category', uploadCategory);
 
       try {
-        const res = await fetch('http://localhost:5001/api/documents/upload', {
+        const res = await fetch(`${API_BASE}/api/documents/upload`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${user?.token}` },
           body: formData,
@@ -81,7 +82,7 @@ export default function Documents() {
 
   const handleDelete = async (id: string) => {
     try {
-      await fetch(`http://localhost:5001/api/documents/${id}`, {
+      await fetch(`${API_BASE}/api/documents/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${user?.token}` },
       });

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, DollarSign, Users, Briefcase, Bell, Clock, FileText, TrendingUp, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import API_BASE from '../config/api';
 import './Dashboard.css';
 
 const COLORS = ['#5e5ce6', '#32d74b', '#ff9f0a', '#ff453a'];
@@ -30,7 +31,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch('http://localhost:5001/api/dashboard/stats', {
+        const res = await fetch(`${API_BASE}/api/dashboard/stats`, {
           headers: { 'Authorization': `Bearer ${user?.token}` }
         });
         if (res.ok) {

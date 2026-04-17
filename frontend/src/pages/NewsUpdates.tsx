@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Newspaper, ExternalLink, Bell, TrendingUp, Landmark, Scale, Receipt, Shield, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import API_BASE from '../config/api';
 import './NewsUpdates.css';
 
 type Source = 'all' | 'tax' | 'rbi' | 'sebi' | 'gst' | 'mca';
@@ -32,7 +33,7 @@ export default function NewsUpdates() {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5001/api/news');
+      const res = await fetch(`${API_BASE}/api/news`);
       if (res.ok) {
         const data = await res.json();
         setNews(data);

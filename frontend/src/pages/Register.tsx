@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { ArrowRight, Lock, Mail, User } from 'lucide-react';
+import API_BASE from '../config/api';
 import './Auth.css';
 
 export default function Register() {
@@ -20,7 +21,7 @@ export default function Register() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:5001/api/auth/register', {
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, role: 'client' }) // Default all new signs to client
