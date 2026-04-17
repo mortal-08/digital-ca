@@ -7,10 +7,10 @@
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd backend && npm run dev",
     "client": "cd frontend && npm run dev",
-    "build": "cd backend && npm install && cd ../frontend && npm install && npm run build",
-    "postinstall": "cd backend && npm install && cd ../frontend && npm install"
+    "build": "cd backend && npm install --production && cd ../frontend && npm install && npm run build",
+    "postinstall": "npm run build"
   },
-  "devDependencies": {
+  "dependencies": {
     "concurrently": "^8.2.2"
   }
 }
