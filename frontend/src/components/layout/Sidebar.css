@@ -15,6 +15,11 @@
   gap: 0.85rem;
   margin-bottom: 2rem;
   padding: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sidebar-theme {
+  margin-left: auto;
 }
 
 .brand-logo {

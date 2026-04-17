@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Calculator, PieChart, MessageSquare, Settings, ClipboardList, Newspaper, LogOut, Upload } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import ThemeToggle from '../ThemeToggle';
 import './Sidebar.css';
 
 export default function Sidebar() {
@@ -31,6 +32,7 @@ export default function Sidebar() {
           <h2>Digital CA</h2>
           <span className="brand-sub">Platform</span>
         </div>
+        <div className="sidebar-theme"><ThemeToggle /></div>
       </div>
 
       <nav className="sidebar-nav">

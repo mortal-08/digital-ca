@@ -163,7 +163,7 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom Row */}
-      <div className="dash-bottom-row">
+      <div className="dash-bottom-row dash-bottom-3">
         {/* Activity Feed */}
         <motion.div className="dash-panel card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
           <h3><Bell size={18} /> Recent Activity</h3>
@@ -176,6 +176,48 @@ export default function Dashboard() {
                   <small className="text-muted">{a.time}</small>
                 </div>
               </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Financial Health Score */}
+        <motion.div className="dash-panel card health-score-panel" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
+          <h3><Target size={18} /> Financial Health</h3>
+          <div className="health-gauge">
+            <svg viewBox="0 0 120 120" className="gauge-svg">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border-color)" strokeWidth="8" />
+              <motion.circle cx="60" cy="60" r="50" fill="none" stroke="url(#healthGrad)" strokeWidth="8"
+                strokeLinecap="round" strokeDasharray="314" initial={{ strokeDashoffset: 314 }}
+                animate={{ strokeDashoffset: 314 - (314 * 0.87) }} transition={{ delay: 0.8, duration: 1.5, ease: 'easeOut' }}
+                transform="rotate(-90 60 60)" />
+              <defs>
+                <linearGradient id="healthGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#32d74b" />
+                  <stop offset="100%" stopColor="#5e5ce6" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div className="gauge-center">
+              <motion.span className="gauge-value" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}>87</motion.span>
+              <span className="gauge-label">/ 100</span>
+            </div>
+          </div>
+          <div className="health-items">
+            {[
+              { label: 'Tax Compliance', score: 98, color: '#32d74b' },
+              { label: 'Filing Timeliness', score: 85, color: '#5e5ce6' },
+              { label: 'Debt Ratio', score: 78, color: '#ff9f0a' },
+              { label: 'Growth Rate', score: 92, color: '#bf5af2' },
+            ].map((h, i) => (
+              <div key={h.label} className="health-row">
+                <span>{h.label}</span>
+                <div className="health-bar-track">
+                  <motion.div className="health-bar-fill" style={{ background: h.color }}
+                    initial={{ width: 0 }} animate={{ width: `${h.score}%` }}
+                    transition={{ delay: 0.9 + i * 0.1, duration: 0.8 }} />
+                </div>
+                <span className="health-score-val">{h.score}%</span>
+              </div>
             ))}
           </div>
         </motion.div>

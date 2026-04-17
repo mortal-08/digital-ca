@@ -292,11 +292,11 @@
 .source-badge.sebi { background: hsl(35,92%,95%); color: hsl(35,92%,40%); }
 .source-badge.gst { background: hsl(200,80%,95%); color: hsl(200,80%,35%); }
 .source-badge.mca { background: hsl(354,70%,95%); color: hsl(354,70%,45%); }
-[data-theme='dark'] .source-badge.tax { background: hsla(243,80%,50%,0.15); }
-[data-theme='dark'] .source-badge.rbi { background: hsla(152,69%,40%,0.15); }
-[data-theme='dark'] .source-badge.sebi { background: hsla(35,92%,40%,0.15); }
-[data-theme='dark'] .source-badge.gst { background: hsla(200,80%,40%,0.15); }
-[data-theme='dark'] .source-badge.mca { background: hsla(354,70%,40%,0.15); }
+[data-theme='dark'] .source-badge.tax { background: hsla(243,80%,50%,0.15); color: hsl(243,80%,75%); }
+[data-theme='dark'] .source-badge.rbi { background: hsla(152,69%,40%,0.15); color: hsl(152,60%,60%); }
+[data-theme='dark'] .source-badge.sebi { background: hsla(35,92%,40%,0.15); color: hsl(35,80%,60%); }
+[data-theme='dark'] .source-badge.gst { background: hsla(200,80%,40%,0.15); color: hsl(200,70%,65%); }
+[data-theme='dark'] .source-badge.mca { background: hsla(354,70%,40%,0.15); color: hsl(354,60%,65%); }
 .news-time { color: var(--text-muted); font-size: 0.75rem; }
 .news-text { color: var(--text-main); font-size: 0.9rem; line-height: 1.5; }
 

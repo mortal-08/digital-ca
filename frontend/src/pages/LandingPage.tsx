@@ -7,6 +7,7 @@ import {
   TrendingUp, Clock, Globe, Star, ChevronRight,
   Landmark, Scale, Receipt, PieChart
 } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 import './LandingPage.css';
 
 // Animated Counter Component
@@ -95,6 +96,7 @@ export default function LandingPage() {
             <a href="#contact">Contact</a>
           </div>
           <div className="nav-actions">
+            <ThemeToggle />
             <Link to="/login" className="btn-ghost">Sign In</Link>
             <Link to="/register" className="btn-cta">Get Started <ArrowRight size={16}/></Link>
           </div>
