@@ -12,6 +12,7 @@ const Reports = React.lazy(() => import('./pages/Reports'));
 const TaskManager = React.lazy(() => import('./pages/TaskManager'));
 const NewsUpdates = React.lazy(() => import('./pages/NewsUpdates'));
 const Messages = React.lazy(() => import('./pages/Messages'));
+const Settings = React.lazy(() => import('./pages/Settings'));
 const Login = React.lazy(() => import('./pages/Login'));
 const Register = React.lazy(() => import('./pages/Register'));
 
@@ -47,7 +48,7 @@ function AppRoutes() {
           <Route path="tasks" element={<TaskManager />} />
           <Route path="news" element={<NewsUpdates />} />
           <Route path="messages" element={<Messages />} />
-          <Route path="settings" element={<div style={{ padding: '2rem' }}><h2>Settings</h2><p className="text-muted">Coming soon...</p></div>} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* Catch-all */}

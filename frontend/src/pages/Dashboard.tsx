@@ -1,32 +1,55 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, DollarSign, Users, Briefcase, Bell, Clock, FileText, TrendingUp, AlertCircle } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Users, Bell, Clock, FileText, TrendingUp, AlertCircle, Calendar, IndianRupee, Activity, Target } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import API_BASE from '../config/api';
 import './Dashboard.css';
 
 const COLORS = ['#5e5ce6', '#32d74b', '#ff9f0a', '#ff453a'];
 
-const recentActivity = [
-  { icon: FileText, text: 'ITR filed for Mehta Industries', time: '2 hours ago', color: 'var(--color-primary)' },
-  { icon: Bell, text: 'GST Return deadline in 5 days', time: '3 hours ago', color: 'var(--status-warning)' },
-  { icon: Users, text: 'New client registered: UrbanCraft Ltd', time: '5 hours ago', color: 'var(--status-success)' },
-  { icon: AlertCircle, text: 'TDS payment overdue for client XYZ', time: '1 day ago', color: 'var(--status-danger)' },
-  { icon: TrendingUp, text: 'Monthly report generated for March', time: '2 days ago', color: 'var(--color-primary)' },
+const revenueData = [
+  { month: 'Jan', rev: 32 }, { month: 'Feb', rev: 38 }, { month: 'Mar', rev: 45 },
+  { month: 'Apr', rev: 41 }, { month: 'May', rev: 49 }, { month: 'Jun', rev: 53 },
+  { month: 'Jul', rev: 48 }, { month: 'Aug', rev: 56 }, { month: 'Sep', rev: 52 },
+  { month: 'Oct', rev: 61 }, { month: 'Nov', rev: 58 }, { month: 'Dec', rev: 65 },
 ];
 
-const upcomingDeadlines = [
-  { task: 'GSTR-3B Filing — March 2026', date: 'Apr 20', urgent: true },
-  { task: 'Advance Tax — Q1 Installment', date: 'Jun 15', urgent: false },
-  { task: 'TDS Return — Q4 (Form 24Q)', date: 'May 31', urgent: false },
-  { task: 'Annual ROC Filing — Form AOC-4', date: 'May 30', urgent: false },
+const serviceData = [
+  { name: 'Tax Filing', value: 35 }, { name: 'GST Returns', value: 28 },
+  { name: 'Audit', value: 22 }, { name: 'Advisory', value: 15 },
+];
+
+const activities = [
+  { icon: FileText, text: 'ITR filed for Sharma Enterprises', time: '2 hours ago', color: '#5e5ce6' },
+  { icon: Users, text: 'New client onboarded — Patel Industries', time: '5 hours ago', color: '#32d74b' },
+  { icon: IndianRupee, text: 'GST Return Q4 submitted', time: 'Yesterday', color: '#ff9f0a' },
+  { icon: Calendar, text: 'Audit scheduled — ABC Textiles', time: '2 days ago', color: '#bf5af2' },
+];
+
+const deadlines = [
+  { title: 'ITR Filing (Individuals)', date: 'Jul 31, 2026', urgency: 'high' },
+  { title: 'TDS Q1 Return', date: 'Jul 31, 2026', urgency: 'high' },
+  { title: 'GST Annual Return', date: 'Dec 31, 2026', urgency: 'medium' },
+  { title: 'Advance Tax - 2nd Installment', date: 'Sep 15, 2026', urgency: 'medium' },
+];
+
+const quickActions = [
+  { icon: FileText, label: 'New ITR', gradient: 'linear-gradient(135deg, #5e5ce6, #818cf8)' },
+  { icon: IndianRupee, label: 'GST Return', gradient: 'linear-gradient(135deg, #32d74b, #6dd5fa)' },
+  { icon: Users, label: 'Add Client', gradient: 'linear-gradient(135deg, #ff9f0a, #fbbf24)' },
+  { icon: Target, label: 'New Task', gradient: 'linear-gradient(135deg, #bf5af2, #a78bfa)' },
 ];
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [dashboardData, setDashboardData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ totalClients: 156, activeReturns: 42, pendingTasks: 8, revenue: 65.4 });
+  const [greeting, setGreeting] = useState('');
+
+  useEffect(() => {
+    const h = new Date().getHours();
+    setGreeting(h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening');
+  }, []);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -36,141 +59,139 @@ export default function Dashboard() {
         });
         if (res.ok) {
           const data = await res.json();
-          setDashboardData(data);
+          setStats(prev => ({ ...prev, ...data }));
         }
-      } catch (err) {
-        // Fallback data if server is unreachable
-        setDashboardData({
-          performanceData: [
-            { name: 'Jan', revenue: 4000, expenses: 2400 },
-            { name: 'Feb', revenue: 3000, expenses: 1398 },
-            { name: 'Mar', revenue: 5000, expenses: 2800 },
-            { name: 'Apr', revenue: 2780, expenses: 3908 },
-            { name: 'May', revenue: 1890, expenses: 4800 },
-            { name: 'Jun', revenue: 2390, expenses: 3800 },
-            { name: 'Jul', revenue: 3490, expenses: 2900 },
-          ],
-          expenseData: [
-            { name: 'Payroll', value: 4500 },
-            { name: 'Marketing', value: 1200 },
-            { name: 'Software', value: 800 },
-            { name: 'Office', value: 500 },
-          ],
-          stats: [
-            { title: "Total Revenue", value: "₹45.2L", trend: "+20.1%", iconType: "dollar", isPositive: true },
-            { title: "Active Clients", value: "240", trend: "+12.5%", iconType: "user", isPositive: true },
-            { title: "Active Projects", value: "45", trend: "-2.4%", iconType: "briefcase", isPositive: false },
-          ]
-        });
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { /* use fallback data */ }
     };
     fetchStats();
   }, [user]);
 
-  if (loading || !dashboardData) {
-    return (
-      <div className="dashboard" style={{height:'100%',display:'flex',alignItems:'center',justifyContent:'center'}}>
-        <div className="loading-spinner" />
-      </div>
-    );
-  }
+  const statCards = [
+    { label: 'Total Clients', value: stats.totalClients, icon: Users, trend: '+12%', positive: true, gradient: 'linear-gradient(135deg, hsla(246, 80%, 60%, 0.12), hsla(246, 80%, 60%, 0.04))' },
+    { label: 'Active Returns', value: stats.activeReturns, icon: FileText, trend: '+8', positive: true, gradient: 'linear-gradient(135deg, hsla(145, 65%, 52%, 0.12), hsla(145, 65%, 52%, 0.04))' },
+    { label: 'Pending Tasks', value: stats.pendingTasks, icon: Clock, trend: '-3', positive: true, gradient: 'linear-gradient(135deg, hsla(35, 92%, 48%, 0.12), hsla(35, 92%, 48%, 0.04))' },
+    { label: 'Revenue (₹L)', value: stats.revenue, icon: IndianRupee, trend: '+18.2%', positive: true, gradient: 'linear-gradient(135deg, hsla(280, 67%, 64%, 0.12), hsla(280, 67%, 64%, 0.04))' },
+  ];
 
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <div>
-          <h1>Dashboard Overview</h1>
-          <p className="text-muted">Welcome back {user?.name} 👋 Here's what's happening today.</p>
+    <div className="dashboard-elite">
+      {/* Header */}
+      <header className="dash-header">
+        <div className="dash-greeting">
+          <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            {greeting}, <span className="text-gradient">{user?.name?.split(' ')[0] || 'User'}</span> 👋
+          </motion.h1>
+          <p className="text-muted">Here's what's happening with your practice today.</p>
+        </div>
+        <div className="dash-header-actions">
+          <div className="dash-date">
+            <Calendar size={16} />
+            {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </div>
         </div>
       </header>
 
-      {/* Stats */}
-      <motion.div className="stats-grid" initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{delay:0.1}}>
-        {dashboardData.stats.map((stat: any, i: number) => (
-          <motion.div key={stat.title} className="stat-card card" initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{delay:0.1+(i*0.1)}}>
-            <div className="stat-header">
-              <span className="stat-title">{stat.title}</span>
-              <div className="stat-icon">
-                {stat.iconType === 'dollar' ? <DollarSign size={20}/> : stat.iconType === 'user' ? <Users size={20}/> : <Briefcase size={20}/>}
+      {/* Quick Actions */}
+      <div className="quick-actions">
+        {quickActions.map((qa, i) => (
+          <motion.button key={qa.label} className="quick-action-btn" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
+            <div className="qa-icon" style={{ background: qa.gradient }}><qa.icon size={18} /></div>
+            {qa.label}
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Stat Cards */}
+      <div className="stat-grid">
+        {statCards.map((s, i) => (
+          <motion.div key={s.label} className="stat-card" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
+            style={{ background: s.gradient }}>
+            <div className="stat-card-header">
+              <span className="stat-label">{s.label}</span>
+              <div className={`stat-trend ${s.positive ? 'up' : 'down'}`}>
+                {s.positive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />} {s.trend}
               </div>
             </div>
-            <div className="stat-value">{stat.value}</div>
-            <div className={`stat-trend ${stat.isPositive?'positive':'negative'}`}>
-              {stat.isPositive ? <ArrowUpRight size={16}/> : <ArrowDownRight size={16}/>}
-              <span>{stat.trend} from last month</span>
-            </div>
+            <div className="stat-value">{typeof s.value === 'number' && s.value > 100 ? s.value.toLocaleString() : s.value}</div>
+            <div className="stat-icon-bg"><s.icon size={40} /></div>
           </motion.div>
         ))}
-      </motion.div>
+      </div>
 
       {/* Charts Row */}
-      <div className="charts-grid">
-        <motion.div className="chart-card card" initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} transition={{delay:0.4}}>
-          <div className="chart-header"><h3>Revenue vs Expenses</h3></div>
-          <div className="chart-body">
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={dashboardData.performanceData} margin={{top:10,right:30,left:0,bottom:0}}>
-                <defs>
-                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.3}/><stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/></linearGradient>
-                  <linearGradient id="colorExp" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--status-danger)" stopOpacity={0.3}/><stop offset="95%" stopColor="var(--status-danger)" stopOpacity={0}/></linearGradient>
-                </defs>
-                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false}/>
-                <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={v=>`$${v}`}/>
-                <Tooltip contentStyle={{backgroundColor:'var(--bg-surface)',border:'1px solid var(--border-color)',borderRadius:'8px'}}/>
-                <Area type="monotone" dataKey="revenue" stroke="var(--color-primary)" fillOpacity={1} fill="url(#colorRev)"/>
-                <Area type="monotone" dataKey="expenses" stroke="var(--status-danger)" fillOpacity={1} fill="url(#colorExp)"/>
-              </AreaChart>
-            </ResponsiveContainer>
+      <div className="dash-charts-row">
+        <motion.div className="dash-chart-card card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+          <div className="chart-card-header">
+            <h3><Activity size={18} /> Revenue Trend</h3>
+            <span className="chart-badge">FY 2025-26</span>
           </div>
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="dashGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#5e5ce6" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#5e5ce6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v => `₹${v}L`} />
+              <Tooltip contentStyle={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '0.85rem' }} formatter={(v: any) => [`₹${v}L`, 'Revenue']} />
+              <Area type="monotone" dataKey="rev" stroke="#5e5ce6" strokeWidth={2.5} fill="url(#dashGrad)" dot={{ fill: '#5e5ce6', r: 3 }} activeDot={{ r: 5, fill: '#5e5ce6' }} />
+            </AreaChart>
+          </ResponsiveContainer>
         </motion.div>
-        <motion.div className="chart-card card" initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} transition={{delay:0.5}}>
-          <div className="chart-header"><h3>Expense Breakdown</h3></div>
-          <div className="chart-body" style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart><Pie data={dashboardData.expenseData} innerRadius={70} outerRadius={100} paddingAngle={5} dataKey="value">
-                {dashboardData.expenseData.map((_:any,i:number)=><Cell key={i} fill={COLORS[i%COLORS.length]}/>)}
-              </Pie><Tooltip contentStyle={{backgroundColor:'var(--bg-surface)',border:'1px solid var(--border-color)',borderRadius:'8px'}}/></PieChart>
-            </ResponsiveContainer>
-            <div className="pie-legend">
-              {dashboardData.expenseData.map((entry:any,i:number)=>(
-                <div key={entry.name} className="legend-item"><div className="legend-color" style={{backgroundColor:COLORS[i%COLORS.length]}}/><span>{entry.name}</span></div>
-              ))}
-            </div>
+
+        <motion.div className="dash-chart-card card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+          <div className="chart-card-header">
+            <h3><TrendingUp size={18} /> Service Mix</h3>
+            <span className="chart-badge">This Quarter</span>
+          </div>
+          <ResponsiveContainer width="100%" height={240}>
+            <PieChart>
+              <Pie data={serviceData} innerRadius={55} outerRadius={90} paddingAngle={4} dataKey="value" fontSize={11}>
+                {serviceData.map((_entry, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+              </Pie>
+              <Tooltip contentStyle={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '0.85rem' }} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="pie-legend">
+            {serviceData.map((s, i) => (
+              <span key={s.name}><span className="legend-dot" style={{ background: COLORS[i] }} />{s.name}</span>
+            ))}
           </div>
         </motion.div>
       </div>
 
-      {/* Bottom Row — Activity + Deadlines */}
-      <div className="bottom-grid">
-        <motion.div className="card" initial={{opacity:0,y:15}} animate={{opacity:1,y:0}} transition={{delay:0.6}}>
-          <h3 style={{marginBottom:'1.25rem'}}>Recent Activity</h3>
-          <div className="activity-list">
-            {recentActivity.map((item, i) => (
-              <div key={i} className="activity-item">
-                <div className="activity-icon" style={{color: item.color}}><item.icon size={16}/></div>
+      {/* Bottom Row */}
+      <div className="dash-bottom-row">
+        {/* Activity Feed */}
+        <motion.div className="dash-panel card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+          <h3><Bell size={18} /> Recent Activity</h3>
+          <div className="activity-feed">
+            {activities.map((a, i) => (
+              <motion.div key={i} className="activity-item" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.08 }}>
+                <div className="activity-icon" style={{ background: `${a.color}15`, color: a.color }}><a.icon size={16} /></div>
                 <div className="activity-text">
-                  <span>{item.text}</span>
-                  <small>{item.time}</small>
+                  <span>{a.text}</span>
+                  <small className="text-muted">{a.time}</small>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
 
-        <motion.div className="card" initial={{opacity:0,y:15}} animate={{opacity:1,y:0}} transition={{delay:0.7}}>
-          <h3 style={{marginBottom:'1.25rem'}}>Upcoming Deadlines</h3>
-          <div className="deadlines-list">
-            {upcomingDeadlines.map((d, i) => (
-              <div key={i} className={`deadline-item ${d.urgent ? 'urgent' : ''}`}>
-                <Clock size={16}/>
+        {/* Deadlines */}
+        <motion.div className="dash-panel card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
+          <h3><AlertCircle size={18} /> Upcoming Deadlines</h3>
+          <div className="deadline-list">
+            {deadlines.map((d, i) => (
+              <motion.div key={i} className="deadline-item" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 + i * 0.08 }}>
+                <div className={`deadline-urgency ${d.urgency}`} />
                 <div className="deadline-text">
-                  <span>{d.task}</span>
-                  <small>{d.date}</small>
+                  <span>{d.title}</span>
+                  <small className="text-muted">{d.date}</small>
                 </div>
-                {d.urgent && <span className="urgent-badge">Urgent</span>}
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
