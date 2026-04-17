@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import {
   ComposedChart, Bar, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  BarChart, LineChart,
+  BarChart,
 } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, Download, BarChart3, Activity, Target } from 'lucide-react';
 import './Reports.css';
@@ -166,7 +166,7 @@ export default function Reports() {
               <h3>Tax Obligation Breakdown</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
-                  <Pie data={taxBreakdown} innerRadius={70} outerRadius={110} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
+                  <Pie data={taxBreakdown} innerRadius={70} outerRadius={110} paddingAngle={3} dataKey="value" label={({ name, percent }: any) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
                     {taxBreakdown.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
                   </Pie>
                   <Tooltip content={<CustomTooltip />} />
@@ -211,7 +211,7 @@ export default function Reports() {
                 <CartesianGrid stroke="var(--border-color)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="year" stroke="var(--text-muted)" fontSize={12} tickLine={false} />
                 <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} domain={[-8, 10]} />
-                <Tooltip contentStyle={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px' }} formatter={(v: number) => [`${v}%`, '']} />
+                <Tooltip contentStyle={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px' }} formatter={(v: any) => [`${v}%`, '']} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '0.85rem' }} />
                 <Area type="monotone" dataKey="cpi" fill="url(#gradCPI)" stroke="#ff453a" strokeWidth={2} name="CPI Inflation (%)" />
                 <Line type="monotone" dataKey="repo" stroke="#5e5ce6" strokeWidth={3} dot={{ fill: '#5e5ce6', r: 4 }} name="RBI Repo Rate (%)" />
@@ -228,7 +228,7 @@ export default function Reports() {
                 <CartesianGrid stroke="var(--border-color)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="year" stroke="var(--text-muted)" fontSize={12} tickLine={false} />
                 <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={v => `₹${v}L Cr`} />
-                <Tooltip contentStyle={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px' }} formatter={(v: number) => [`₹${v} Lakh Cr`, '']} />
+                <Tooltip contentStyle={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px' }} formatter={(v: any) => [`₹${v} Lakh Cr`, '']} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '0.85rem' }} />
                 <Bar dataKey="direct" stackId="tax" fill="#5e5ce6" radius={[0, 0, 0, 0]} name="Direct Tax" />
                 <Bar dataKey="indirect" stackId="tax" fill="#bf5af2" radius={[4, 4, 0, 0]} name="Indirect Tax" />
