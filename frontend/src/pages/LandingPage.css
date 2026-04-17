@@ -49,6 +49,15 @@
   text-decoration: none;
 }
 .btn-ghost:hover { background: var(--bg-surface-hover); text-decoration: none; }
+/* Inside hero (dark bg) make ghost button always white */
+.hero-buttons .btn-ghost {
+  color: white;
+  border: 1px solid hsla(0,0%,100%,0.3);
+}
+.hero-buttons .btn-ghost:hover {
+  background: hsla(0,0%,100%,0.1);
+  border-color: hsla(0,0%,100%,0.5);
+}
 .btn-cta {
   display: inline-flex;
   align-items: center;

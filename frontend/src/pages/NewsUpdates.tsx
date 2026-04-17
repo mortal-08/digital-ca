@@ -33,7 +33,7 @@ export default function NewsUpdates() {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/news`);
+      const res = await fetch(`${API_BASE}/api/news?t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setNews(data);
@@ -117,6 +117,8 @@ export default function NewsUpdates() {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04 }}
+                  onClick={() => item.link && window.open(item.link, '_blank')}
+                  style={{ cursor: item.link ? 'pointer' : 'default' }}
                 >
                   <div className="news-article-header">
                     <div className="news-source-info">
@@ -129,9 +131,11 @@ export default function NewsUpdates() {
                   <h3>{item.title}</h3>
                   {item.summary && <p>{item.summary.substring(0, 250)}{item.summary.length > 250 ? '...' : ''}</p>}
                   {item.link && (
-                    <a href={item.link} target="_blank" rel="noreferrer" className="read-more">
-                      Read on official site <ExternalLink size={14} />
-                    </a>
+                    <span className="read-more" onClick={(e) => e.stopPropagation()}>
+                      <a href={item.link} target="_blank" rel="noreferrer">
+                        Read on official site <ExternalLink size={14} />
+                      </a>
+                    </span>
                   )}
                 </motion.article>
               );

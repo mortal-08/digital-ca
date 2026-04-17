@@ -1,12 +1,10 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Calculator, PieChart, MessageSquare, Settings, ClipboardList, Newspaper, LogOut, Upload } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { LayoutDashboard, Calculator, PieChart, MessageSquare, Settings, ClipboardList, Newspaper, Upload } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import ThemeToggle from '../ThemeToggle';
 import './Sidebar.css';
 
 export default function Sidebar() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
 
   const navItems = [
@@ -19,11 +17,6 @@ export default function Sidebar() {
     { name: 'Messages', path: '/dashboard/messages', icon: MessageSquare },
   ];
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -32,7 +25,6 @@ export default function Sidebar() {
           <h2>Digital CA</h2>
           <span className="brand-sub">Platform</span>
         </div>
-        <div className="sidebar-theme"><ThemeToggle /></div>
       </div>
 
       <nav className="sidebar-nav">
@@ -55,10 +47,6 @@ export default function Sidebar() {
           <Settings className="nav-icon" size={20} />
           <span>Settings</span>
         </NavLink>
-        <button className="nav-item logout-btn" onClick={handleLogout}>
-          <LogOut className="nav-icon" size={20} />
-          <span>Logout</span>
-        </button>
       </div>
     </aside>
   );
