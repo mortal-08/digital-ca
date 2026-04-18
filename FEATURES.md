@@ -7,7 +7,6 @@ Your all-in-one platform for managing finances, taxes, and compliance.
 ## 🔐 Account & Login
 - Create an account or sign in securely
 - Password protection with visibility toggle
-- Admin and Client user roles
 - Logout anytime from the sidebar
 
 ---
