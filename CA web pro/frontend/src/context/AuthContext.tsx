@@ -16,6 +16,7 @@ interface User {
   address?: string;
   pan?: string;
   gstin?: string;
+  status?: string;
 }
 
 interface AuthContextType {

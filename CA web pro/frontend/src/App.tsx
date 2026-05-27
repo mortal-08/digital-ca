@@ -25,6 +25,7 @@ const UserDocuments    = React.lazy(() => import('./pages/user/UserDocuments'));
 const RequestTracking  = React.lazy(() => import('./pages/user/RequestTracking'));
 const UserMessages     = React.lazy(() => import('./pages/user/UserMessages'));
 const UserProfile      = React.lazy(() => import('./pages/user/UserProfile'));
+const FindCA           = React.lazy(() => import('./pages/user/FindCA'));
 
 const PageLoader = () => (
   <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-base)' }}>
@@ -94,6 +95,7 @@ function AppRoutes() {
           <Route path="tracking"   element={<RequestTracking />} />
           <Route path="messages"   element={<UserMessages />} />
           <Route path="profile"    element={<UserProfile />} />
+          <Route path="find-ca"    element={<FindCA />} />
         </Route>
 
         {/* Legacy /dashboard redirect */}

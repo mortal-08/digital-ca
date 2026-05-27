@@ -1,11 +1,12 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, Upload, Clock, MessageSquare, User, LogOut, Bell } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Upload, Clock, MessageSquare, User, LogOut, Bell, Shield } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
 import './UserLayout.css';
 
 const navItems = [
   { name: 'Dashboard',  path: '/user/dashboard', icon: LayoutDashboard },
+  { name: 'Find CA',    path: '/user/find-ca',   icon: Shield },
   { name: 'Services',   path: '/user/services',  icon: PlusCircle },
   { name: 'Documents',  path: '/user/documents', icon: Upload },
   { name: 'Tracking',   path: '/user/tracking',  icon: Clock },
