@@ -1,16 +1,14 @@
 {
-  "name": "digital-ca-platform",
+  "name": "ca-web-pro-root",
   "version": "1.0.0",
-  "description": "Smart Digital Platform for Chartered Accountants",
+  "private": true,
   "scripts": {
-    "start": "cd backend && node index.js",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd backend && npm run dev",
-    "client": "cd frontend && npm run dev",
-    "build": "cd backend && npm install --production && cd ../frontend && npm install && npm run build",
-    "postinstall": "npm run build"
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "npm run dev --prefix \"CA web pro/backend\"",
+    "frontend": "npm run dev --prefix \"CA web pro/frontend\"",
+    "install-all": "npm install --prefix \"CA web pro/backend\" && npm install --prefix \"CA web pro/frontend\""
   },
-  "dependencies": {
-    "concurrently": "^8.2.2"
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

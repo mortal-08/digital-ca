@@ -18,6 +18,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Scratch/debug
+scratch/
+
 # Logs
 *.log
 npm-debug.log*
