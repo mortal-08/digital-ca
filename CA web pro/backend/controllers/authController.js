@@ -65,6 +65,13 @@ const registerUser = async (req, res) => {
                     caId = caMatch._id;
                     status = 'approved';
                 }
+            } else {
+                // Auto-link to the only CA if there's exactly one in the system
+                const allCAs = await CAProfile.find({}).select('_id');
+                if (allCAs.length === 1) {
+                    caId = allCAs[0]._id;
+                    status = 'approved';
+                }
             }
 
             const user = await User.create({
