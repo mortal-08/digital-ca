@@ -9,7 +9,16 @@ const getPendingClients = async (req, res) => {
             return res.status(403).json({ message: 'Access denied. CAs only.' });
         }
         
-        const clients = await User.find({ caId: req.user._id, status: 'pending' }).select('-password');
+        const CAProfile = require('../models/CAProfile');
+        const caIds = [req.user._id];
+        if (req.user.email) {
+            const caInUser = await User.findOne({ email: req.user.email, role: 'ca' }).select('_id');
+            if (caInUser && caInUser._id.toString() !== req.user._id.toString()) caIds.push(caInUser._id);
+            const caInProfile = await CAProfile.findOne({ email: req.user.email }).select('_id');
+            if (caInProfile && caInProfile._id.toString() !== req.user._id.toString()) caIds.push(caInProfile._id);
+        }
+        
+        const clients = await User.find({ caId: { $in: caIds }, status: 'pending' }).select('-password');
         res.json(clients);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -25,7 +34,16 @@ const getClients = async (req, res) => {
             return res.status(403).json({ message: 'Access denied. CAs only.' });
         }
         
-        const clients = await User.find({ caId: req.user._id, status: 'approved' }).select('-password');
+        const CAProfile = require('../models/CAProfile');
+        const caIds = [req.user._id];
+        if (req.user.email) {
+            const caInUser = await User.findOne({ email: req.user.email, role: 'ca' }).select('_id');
+            if (caInUser && caInUser._id.toString() !== req.user._id.toString()) caIds.push(caInUser._id);
+            const caInProfile = await CAProfile.findOne({ email: req.user.email }).select('_id');
+            if (caInProfile && caInProfile._id.toString() !== req.user._id.toString()) caIds.push(caInProfile._id);
+        }
+        
+        const clients = await User.find({ caId: { $in: caIds }, status: 'approved' }).select('-password');
         res.json(clients);
     } catch (error) {
         res.status(500).json({ message: error.message });

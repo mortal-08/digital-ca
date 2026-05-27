@@ -127,28 +127,59 @@ router.get('/', protect, async (req, res) => {
             query = {
                 $or: [
                     { client: req.user._id },
-                    { client: { $exists: false }, uploadedBy: req.user._id }
+                    { uploadedBy: req.user._id }
                 ]
             };
         } else if (req.user.role === 'ca') {
             const User = require('../models/User');
-            const clients = await User.find({ caId: req.user._id, status: 'approved' }).select('_id');
+            const CAProfile = require('../models/CAProfile');
+
+            // The CA might exist in CAProfile or User collection.
+            // req.user._id is from whichever collection the auth middleware found.
+            // Clients store caId which could point to either collection's _id.
+            // We need to find clients linked to ANY of the CA's possible IDs.
+            const caIds = [req.user._id];
+
+            // If CA is in CAProfile, also check if they exist in User collection (or vice versa)
+            if (req.user.email) {
+                const caInUser = await User.findOne({ email: req.user.email, role: 'ca' }).select('_id');
+                if (caInUser && caInUser._id.toString() !== req.user._id.toString()) {
+                    caIds.push(caInUser._id);
+                }
+                const caInProfile = await CAProfile.findOne({ email: req.user.email }).select('_id');
+                if (caInProfile && caInProfile._id.toString() !== req.user._id.toString()) {
+                    caIds.push(caInProfile._id);
+                }
+            }
+
+            const clients = await User.find({ caId: { $in: caIds }, status: 'approved' }).select('_id');
             const clientIds = clients.map(c => c._id);
-            query = {
-                $or: [
-                    { client: { $in: clientIds } },
-                    { uploadedBy: req.user._id },
-                    { client: { $exists: false }, uploadedBy: { $in: clientIds } }
-                ]
-            };
+
+            console.log(`[Documents] CA ${req.user._id} (${req.user.email}) - caIds: [${caIds}], found ${clientIds.length} clients: [${clientIds}]`);
+
+            if (clientIds.length > 0) {
+                query = {
+                    $or: [
+                        { client: { $in: clientIds } },
+                        { uploadedBy: { $in: caIds } },
+                        { uploadedBy: { $in: clientIds } }
+                    ]
+                };
+            } else {
+                // No clients found, only show CA's own uploads
+                query = { uploadedBy: { $in: caIds } };
+            }
         }
 
         const docs = await Document.find(query)
             .populate('uploadedBy', 'name')
             .populate('client', 'name email')
             .sort({ createdAt: -1 });
+
+        console.log(`[Documents] Returning ${docs.length} documents for ${req.user.role} ${req.user._id}`);
         res.json(docs);
     } catch (error) {
+        console.error('[Documents] Error fetching documents:', error);
         res.status(500).json({ message: error.message });
     }
 });
@@ -161,7 +192,16 @@ router.get('/client/:clientId', protect, async (req, res) => {
         
         if (req.user.role === 'ca') {
             const User = require('../models/User');
-            const client = await User.findOne({ _id: clientId, caId: req.user._id });
+            const CAProfile = require('../models/CAProfile');
+            // Build list of all possible CA IDs
+            const caIds = [req.user._id];
+            if (req.user.email) {
+                const caInUser = await User.findOne({ email: req.user.email, role: 'ca' }).select('_id');
+                if (caInUser && caInUser._id.toString() !== req.user._id.toString()) caIds.push(caInUser._id);
+                const caInProfile = await CAProfile.findOne({ email: req.user.email }).select('_id');
+                if (caInProfile && caInProfile._id.toString() !== req.user._id.toString()) caIds.push(caInProfile._id);
+            }
+            const client = await User.findOne({ _id: clientId, caId: { $in: caIds } });
             if (!client) {
                 return res.status(403).json({ message: 'Access denied. This client is not linked to you.' });
             }
@@ -172,7 +212,7 @@ router.get('/client/:clientId', protect, async (req, res) => {
         }
 
         const docs = await Document.find({
-            client: clientId
+            $or: [{ client: clientId }, { uploadedBy: clientId }]
         })
         .populate('uploadedBy', 'name')
         .sort({ createdAt: -1 });
@@ -196,8 +236,17 @@ router.get('/download/:id', protect, async (req, res) => {
         }
         if (req.user.role === 'ca') {
             const User = require('../models/User');
-            const client = await User.findOne({ _id: doc.client, caId: req.user._id });
-            if (!client && doc.uploadedBy.toString() !== req.user._id.toString()) {
+            const CAProfile = require('../models/CAProfile');
+            const caIds = [req.user._id];
+            if (req.user.email) {
+                const caInUser = await User.findOne({ email: req.user.email, role: 'ca' }).select('_id');
+                if (caInUser && caInUser._id.toString() !== req.user._id.toString()) caIds.push(caInUser._id);
+                const caInProfile = await CAProfile.findOne({ email: req.user.email }).select('_id');
+                if (caInProfile && caInProfile._id.toString() !== req.user._id.toString()) caIds.push(caInProfile._id);
+            }
+            const client = await User.findOne({ _id: doc.client, caId: { $in: caIds } });
+            const isOwnUpload = caIds.some(id => doc.uploadedBy.toString() === id.toString());
+            if (!client && !isOwnUpload) {
                 return res.status(403).json({ message: 'Access denied to this client\'s document.' });
             }
         }
@@ -230,8 +279,17 @@ router.delete('/:id', protect, async (req, res) => {
         }
         if (req.user.role === 'ca') {
             const User = require('../models/User');
-            const client = await User.findOne({ _id: doc.client, caId: req.user._id });
-            if (!client && doc.uploadedBy.toString() !== req.user._id.toString()) {
+            const CAProfile = require('../models/CAProfile');
+            const caIds = [req.user._id];
+            if (req.user.email) {
+                const caInUser = await User.findOne({ email: req.user.email, role: 'ca' }).select('_id');
+                if (caInUser && caInUser._id.toString() !== req.user._id.toString()) caIds.push(caInUser._id);
+                const caInProfile = await CAProfile.findOne({ email: req.user.email }).select('_id');
+                if (caInProfile && caInProfile._id.toString() !== req.user._id.toString()) caIds.push(caInProfile._id);
+            }
+            const client = await User.findOne({ _id: doc.client, caId: { $in: caIds } });
+            const isOwnUpload = caIds.some(id => doc.uploadedBy.toString() === id.toString());
+            if (!client && !isOwnUpload) {
                 return res.status(403).json({ message: 'Access denied' });
             }
         }
