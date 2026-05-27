@@ -10,6 +10,8 @@ const documentSchema = new mongoose.Schema({
     category: { type: String, default: 'General' },
     uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     client: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+    statusNote: { type: String, default: '' },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Document', documentSchema);

@@ -202,14 +202,27 @@ export default function UserDocuments() {
               </tr>
             </thead>
             <tbody>
-              {history.map((d, i) => (
+              {history.map((d, i) => {
+                const statusColor: Record<string, { bg: string; text: string; border: string }> = {
+                  'Approved': { bg: '#f0fdf4', text: '#16a34a', border: '#bbf7d0' },
+                  'Rejected': { bg: '#fef2f2', text: '#dc2626', border: '#fecaca' },
+                  'Pending':  { bg: '#fffbeb', text: '#d97706', border: '#fde68a' },
+                };
+                const st = statusColor[d.status] || statusColor['Pending'];
+
+                return (
                 <motion.tr key={i} initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:i*0.05 }}>
                   <td style={{ padding:'0.8rem 0.75rem' }}>
                     <div style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
                       <div style={{ width:32, height:32, borderRadius:8, background:'#f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.62rem', fontWeight:700, color:'#6b7280' }}>
                         {d.format?.toUpperCase() || 'FILE'}
                       </div>
-                      <a href={d.url} target="_blank" rel="noreferrer" style={{ fontSize:'0.85rem', fontWeight:600, color:'inherit', textDecoration:'none' }}>{d.name}</a>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <a href={d.url} target="_blank" rel="noreferrer" style={{ fontSize:'0.85rem', fontWeight:600, color:'inherit', textDecoration:'none', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.originalName || d.name}</a>
+                        {d.category && d.category !== 'General' && (
+                          <span style={{ fontSize: '0.72rem', color: '#9ca3af' }}>{d.category}</span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td style={{ fontSize:'0.82rem', fontWeight:500, color:'#374151', padding:'0 0.75rem' }}>
@@ -217,7 +230,23 @@ export default function UserDocuments() {
                   </td>
                   <td style={{ fontSize:'0.82rem', color:'#9ca3af', padding:'0 0.75rem' }}>{(d.size/1024).toFixed(1)} KB</td>
                   <td style={{ fontSize:'0.82rem', color:'#9ca3af', padding:'0 0.75rem' }}>{new Date(d.createdAt).toLocaleDateString()}</td>
-                  <td style={{ padding:'0 0.75rem' }}><span className={`user-badge ${statusMap[d.status] || 'pending'}`}>{d.status || 'Pending'}</span></td>
+                  <td style={{ padding:'0 0.75rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <span style={{ 
+                        display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                        fontSize: '0.75rem', fontWeight: 600, padding: '0.25rem 0.65rem', borderRadius: 20,
+                        background: st.bg, color: st.text, border: `1px solid ${st.border}`, width: 'fit-content'
+                      }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: st.text }}></span>
+                        {d.status || 'Pending'}
+                      </span>
+                      {d.statusNote && (
+                        <span style={{ fontSize: '0.72rem', color: '#6b7280', fontStyle: 'italic', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={d.statusNote}>
+                          "{d.statusNote}"
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td style={{ padding:'0 0.75rem' }}>
                     <div style={{ display: 'flex', gap: '0.4rem' }}>
                       <a href={d.url} target="_blank" rel="noreferrer" className="user-btn user-btn-sm user-btn-outline">View</a>
@@ -225,7 +254,8 @@ export default function UserDocuments() {
                     </div>
                   </td>
                 </motion.tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         )}

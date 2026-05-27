@@ -59,9 +59,26 @@ export default function CADocuments() {
     }
   }, [location.state]);
 
-  const setStatus = async (id: string, status: string) => {
-    // Locally update the status
-    setDocs(prev => prev.map(d => d._id === id ? { ...d, status } : d));
+  const setStatus = async (id: string, status: string, note?: string) => {
+    try {
+      const res = await apiFetch(`${API_BASE}/api/documents/${id}/status`, {
+        method: 'PATCH',
+        headers: { 
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status, statusNote: note || '' })
+      });
+      if (res.ok) {
+        setDocs(prev => prev.map(d => d._id === id ? { ...d, status, statusNote: note || '' } : d));
+      } else {
+        const err = await res.json();
+        alert(err.message || 'Failed to update status');
+      }
+    } catch (err) {
+      console.error('Status update error:', err);
+      alert('Failed to update document status');
+    }
   };
 
   const handleDownload = async (docId: string, fileName: string) => {
@@ -295,22 +312,31 @@ export default function CADocuments() {
                         <Calendar size={12} /> {new Date(d.createdAt).toLocaleDateString()}
                       </span>
                     </td>
-                    <td><span className={`ca-badge ${statusMap[d.status] || 'pending'}`}>{d.status || 'Pending'}</span></td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                        <span className={`ca-badge ${statusMap[d.status] || 'pending'}`}>{d.status || 'Pending'}</span>
+                        {d.statusNote && (
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontStyle: 'italic', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={d.statusNote}>
+                            "{d.statusNote}"
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td>
                       <div style={{ display:'flex', gap:'0.4rem' }}>
                         <a href={d.url} target="_blank" rel="noreferrer" className="ca-btn ca-btn-ghost ca-btn-sm" title="Preview"><Eye size={13} /></a>
                         <button onClick={() => handleDownload(d._id, d.originalName)} className="ca-btn ca-btn-ghost ca-btn-sm" title="Download"><Download size={13} /></button>
-                        {(d.status === 'Pending' || !d.status) && (
-                          <>
-                            <button className="ca-btn ca-btn-ghost ca-btn-sm" style={{ color:'#32d74b' }} onClick={() => setStatus(d._id, 'Approved')} title="Approve">
-                              <CheckCircle size={13} />
-                            </button>
-                            <button className="ca-btn ca-btn-danger ca-btn-sm" onClick={() => setStatus(d._id, 'Rejected')} title="Reject">
-                              <XCircle size={13} />
-                            </button>
-                          </>
+                        {d.status !== 'Approved' && (
+                          <button className="ca-btn ca-btn-ghost ca-btn-sm" style={{ color:'#32d74b' }} onClick={() => setStatus(d._id, 'Approved')} title="Approve">
+                            <CheckCircle size={13} />
+                          </button>
                         )}
-                        <button className="ca-btn ca-btn-ghost ca-btn-sm" onClick={() => setComment({ id:d._id, text:'' })} title="Add Comment">
+                        {d.status !== 'Rejected' && (
+                          <button className="ca-btn ca-btn-danger ca-btn-sm" onClick={() => setStatus(d._id, 'Rejected')} title="Reject">
+                            <XCircle size={13} />
+                          </button>
+                        )}
+                        <button className="ca-btn ca-btn-ghost ca-btn-sm" onClick={() => setComment({ id:d._id, text:d.statusNote || '' })} title="Add Note">
                           <MessageSquare size={13} />
                         </button>
                       </div>
@@ -328,16 +354,22 @@ export default function CADocuments() {
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.55)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200, backdropFilter: 'blur(3px)' }}>
           <motion.div initial={{ opacity:0, scale:0.94 }} animate={{ opacity:1, scale:1 }}
             style={{ background:'var(--bg-surface)', border:'1px solid var(--border-color)', borderRadius:14, padding:'1.5rem', width:380 }}>
-            <h3 style={{ fontWeight:700, marginBottom:'1rem' }}>Add Comment</h3>
+            <h3 style={{ fontWeight:700, marginBottom:'1rem' }}>Add Note</h3>
             <textarea
               value={comment.text}
               onChange={e => setComment(p => p ? { ...p, text:e.target.value } : null)}
-              placeholder="Enter your comment or feedback for the client…"
+              placeholder="Enter a note or feedback for the client (visible on their end)…"
               rows={4}
               style={{ width:'100%', padding:'0.75rem', border:'1.5px solid var(--border-color)', borderRadius:9, background:'var(--bg-body)', color:'var(--text-main)', fontSize:'0.88rem', fontFamily:'inherit', resize:'vertical', outline:'none', boxSizing:'border-box' }}
             />
             <div style={{ display:'flex', gap:'0.7rem', marginTop:'1rem' }}>
-              <button className="ca-btn ca-btn-primary" style={{ flex:1 }} onClick={() => setComment(null)}>Send Comment</button>
+              <button className="ca-btn ca-btn-primary" style={{ flex:1 }} onClick={async () => {
+                if (comment) {
+                  const doc = docs.find(d => d._id === comment.id);
+                  await setStatus(comment.id, doc?.status || 'Pending', comment.text);
+                }
+                setComment(null);
+              }}>Save Note</button>
               <button className="ca-btn ca-btn-ghost" style={{ flex:1 }} onClick={() => setComment(null)}>Cancel</button>
             </div>
           </motion.div>

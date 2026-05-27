@@ -309,4 +309,50 @@ router.delete('/:id', protect, async (req, res) => {
     }
 });
 
+// @desc    Update document status (CA only — Approve/Reject)
+// @route   PATCH /api/documents/:id/status
+router.patch('/:id/status', protect, async (req, res) => {
+    try {
+        if (req.user.role !== 'ca') {
+            return res.status(403).json({ message: 'Only CA can update document status' });
+        }
+
+        const { status, statusNote } = req.body;
+        if (!['Pending', 'Approved', 'Rejected'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status. Must be Pending, Approved, or Rejected.' });
+        }
+
+        const doc = await Document.findById(req.params.id);
+        if (!doc) return res.status(404).json({ message: 'Document not found' });
+
+        // Verify this CA has access to the document's client
+        const User = require('../models/User');
+        const CAProfile = require('../models/CAProfile');
+        const caIds = [req.user._id];
+        if (req.user.email) {
+            const caInUser = await User.findOne({ email: req.user.email, role: 'ca' }).select('_id');
+            if (caInUser && caInUser._id.toString() !== req.user._id.toString()) caIds.push(caInUser._id);
+            const caInProfile = await CAProfile.findOne({ email: req.user.email }).select('_id');
+            if (caInProfile && caInProfile._id.toString() !== req.user._id.toString()) caIds.push(caInProfile._id);
+        }
+
+        if (doc.client) {
+            const client = await User.findOne({ _id: doc.client, caId: { $in: caIds } });
+            const isOwnUpload = caIds.some(id => doc.uploadedBy.toString() === id.toString());
+            if (!client && !isOwnUpload) {
+                return res.status(403).json({ message: 'Access denied to this document.' });
+            }
+        }
+
+        doc.status = status;
+        if (statusNote !== undefined) doc.statusNote = statusNote;
+        await doc.save();
+
+        res.json({ message: `Document ${status.toLowerCase()} successfully`, document: doc });
+    } catch (error) {
+        console.error('[Documents] Status update error:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router;
