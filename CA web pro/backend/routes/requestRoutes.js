@@ -41,17 +41,25 @@ const upload = multer({
     storage,
     limits: { fileSize: 10 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
+        const allowed = ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx', '.xls', '.xlsx'];
         const ext = path.extname(file.originalname).toLowerCase();
-        if (/\.(pdf|jpg|jpeg|png|doc|docx|xls|xlsx)$/i.test(ext)) {
+        if (allowed.includes(ext)) {
             cb(null, true);
         } else {
-            cb(new Error('Unsupported file type'), false);
+            cb(null, false); // silently skip unsupported files instead of throwing
         }
     }
 });
 
 // POST /api/requests — Create a new service request with documents (user)
-router.post('/', protect, upload.array('documents', 10), async (req, res) => {
+router.post('/', protect, (req, res, next) => {
+  upload.array('documents', 10)(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message || 'File upload error' });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
     const { serviceType, description, priority, deadline, amount } = req.body;
     
