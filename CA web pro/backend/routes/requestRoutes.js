@@ -18,19 +18,61 @@ const populateCARecord = async (caId) => {
   return null;
 };
 
-// ─── USER routes ────────────────────────────────────────────────────────────
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
-// POST /api/requests — Create a new service request (user)
-router.post('/', protect, async (req, res) => {
+// Multer config for service request document uploads
+const UPLOADS_DIR = path.join(__dirname, '../uploads');
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const userDir = path.join(UPLOADS_DIR, 'requests', req.user._id.toString());
+        if (!fs.existsSync(userDir)) {
+            fs.mkdirSync(userDir, { recursive: true });
+        }
+        cb(null, userDir);
+    },
+    filename: function (req, file, cb) {
+        const cleanName = path.basename(file.originalname).replace(/[^a-zA-Z0-9.\-_]/g, '_');
+        cb(null, `${Date.now()}_${cleanName}`);
+    }
+});
+const upload = multer({
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (/\.(pdf|jpg|jpeg|png|doc|docx|xls|xlsx)$/i.test(ext)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Unsupported file type'), false);
+        }
+    }
+});
+
+// POST /api/requests — Create a new service request with documents (user)
+router.post('/', protect, upload.array('documents', 10), async (req, res) => {
   try {
     const { serviceType, description, priority, deadline, amount } = req.body;
+    
+    // Build documents array from uploaded files
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const docs = (req.files || []).map(file => ({
+      name: file.originalname,
+      url: `${protocol}://${host}/uploads/requests/${req.user._id}/${file.filename}`,
+      localPath: `uploads/requests/${req.user._id}/${file.filename}`,
+      uploadedAt: new Date()
+    }));
+
     const request = await ServiceRequest.create({
       userId: req.user._id,
       serviceType,
       description,
       priority: priority || 'Medium',
       deadline: deadline ? new Date(deadline) : undefined,
-      amount: amount || 0
+      amount: amount || 0,
+      documents: docs
     });
     res.status(201).json(request);
   } catch (err) {

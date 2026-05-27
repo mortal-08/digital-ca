@@ -27,7 +27,7 @@ const serviceRequestSchema = new mongoose.Schema({
     enum: ['Low', 'Medium', 'High'],
     default: 'Medium'
   },
-  documents: [{ name: String, url: String, uploadedAt: Date }],
+  documents: [{ name: String, url: String, localPath: String, uploadedAt: Date }],
   messages: [messageSchema],
   notes: { type: String },
   deadline: { type: Date },

@@ -48,15 +48,22 @@ export default function RequestService() {
     try {
       const service = services.find(s => s.id === selected);
       const amount = parseInt(service?.price.replace(/[^\d]/g, '') || '0');
+      
+      const formData = new FormData();
+      formData.append('serviceType', service?.name || selected);
+      formData.append('description', desc);
+      formData.append('priority', priority);
+      formData.append('amount', String(amount));
+      
+      // Attach all uploaded files
+      for (const file of files) {
+        formData.append('documents', file);
+      }
+      
       const res = await apiFetch(`${API_BASE}/api/requests`, {
         method: 'POST',
-        headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${user?.token}` },
-        body: JSON.stringify({ 
-          serviceType: service?.name || selected, 
-          description: desc, 
-          priority,
-          amount 
-        })
+        headers: { 'Authorization': `Bearer ${user?.token}` },
+        body: formData
       });
       await res.json();
     } catch { }
