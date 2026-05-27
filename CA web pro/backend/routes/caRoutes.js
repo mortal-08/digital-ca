@@ -57,9 +57,11 @@ router.post('/link-request', protect, async (req, res) => {
             return res.status(400).json({ message: 'Your request is already pending with this CA' });
         }
         
-        client.caId = caId;
-        client.status = 'pending';
-        await client.save();
+        // Use updateOne to bypass pre-save password hook
+        await User.updateOne(
+            { _id: req.user._id },
+            { $set: { caId: caId, status: 'pending' } }
+        );
         
         res.json({ 
             message: `Link request sent to ${ca.fullName}. Please wait for approval.`,
