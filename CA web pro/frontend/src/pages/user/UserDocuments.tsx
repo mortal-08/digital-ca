@@ -129,7 +129,7 @@ export default function UserDocuments() {
     }
   };
 
-  const statusMap: Record<string, string> = { 'Approved':'done', 'Pending':'pending', 'Rejected':'rejected' };
+
 
   return (
     <div>
